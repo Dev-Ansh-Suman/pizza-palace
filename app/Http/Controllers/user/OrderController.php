@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Http\Controllers\user;
+
+use Auth;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Model\Product;
+use App\Model\UserAddress;
+use App\Helper\UserHelper;
+use Illuminate\Support\Facades\View;
+
+class OrderController extends Controller
+{
+    /**
+     * Add Delivery Address.
+     *
+     * @param  required \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+    */
+    public function storeAddress(Request $request)
+    {
+        $data = $request->all();
+        $insertArray = [];
+        foreach($data as $key => $value)
+        {
+            if($key != '_token' && $key != 'submit')
+                $insertArray[$key] = $value;
+        }
+        $insertArray['session_cart'] = $request->session()->get('session_cart');
+        if(Auth::check()){
+            $insertArray['user_id'] = Auth::user()->id;
+        }
+        UserAddress::updateOrCreate(['session_cart'=>$insertArray['session_cart']],$insertArray);
+        return  response()->json(['status'=>true]);
+    }//end storeAddress()
+
+    /**
+     * Place Order.
+     *
+     * @param  required \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+    */
+    public function placeOrder(Request $request)
+    {
+        $order = UserHelper::placeOrder($request);
+        return  response()->json(['status'=>$order['status']]);
+    }//end placeOrder()
+}
