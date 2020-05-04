@@ -3,13 +3,45 @@
         <!-- Fav Icon -->
         <link rel="icon" type="image/png" href="{{url('pizaa-favicon.png')}}">
 
-        <title>Pizza Palace</title>
+        <title>The Yummy Pizza</title>
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
         <!-- Bootstarp -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <style type="text/css">
+            .user{
+                position: relative;
+                display: inline-block;
+                float: right;
+                padding-right: 15px;
+            }
+            .profile-items{
+                display: none;
+                position: absolute;
+                background-color: #f1f1f1;
+                box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+                z-index: 99999;
+                width: 100px;
+                right: 0%;
+            }
+            .user:hover .profile-items {display: block;}
+            .currency{
+                position: relative;
+                display: inline-block;
+                float: right;
+                padding-right: 15px;
+            }
+            .currency-items{
+                display: none;
+                position: absolute;
+                background-color: #f1f1f1;
+                box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+                z-index: 99999;
+                width: 100px;
+                right: 0%;
+            }
+            .currency:hover .currency-items {display: block;}
             .cart {
                 position: relative;
                 display: inline-block;
@@ -24,7 +56,7 @@
                 width: 300px;
                 right: 0%;
             }
-            .cart-items{
+            .cart-items, .ordered-items{
                 height: 300px;
                 overflow-y: scroll;
                 overflow-x: hidden;
@@ -47,7 +79,7 @@
             .page-heading {
                 color: #fd509d;
             }
-            .cart-total, .btn-checkout {
+            .cart-total-b, .btn-checkout {
                 float: right;
                 padding-right: 15px !important;
             }
@@ -61,23 +93,19 @@
                 background: #fd509d;
                 color: white;
             }
-            form.counter {
-                width: 300px;
+            div.counter {
                 margin: 0 auto;
                 text-align: center;
-                padding-top: 50px;
             }
 
             .value-button {
                 display: inline-block;
                 border: 1px solid #ddd;
-                margin: 0px;
-                width: 40px;
-                height: 20px;
-                text-align: center;
+                width: 30px;
+                height: 30px;
+                text-align: center
                 vertical-align: middle;
-                padding: 11px 0;
-                background: #eee;
+                background: #fff;
                 -webkit-touch-callout: none;
                 -webkit-user-select: none;
                 -khtml-user-select: none;
@@ -90,19 +118,12 @@
                 cursor: pointer;
             }
 
-            form.counter .decrease {
-                margin-right: -4px;
+            div.counter .decrease {
                 border-radius: 8px 0 0 8px;
             }
 
-            form.counter .increase {
-                margin-left: -4px;
+            div.counter .increase {
                 border-radius: 0 8px 8px 0;
-            }
-
-            form.counter .input-wrap {
-                margin: 0px;
-                padding: 0px;
             }
 
             input.number {
@@ -110,14 +131,16 @@
                 border: none;
                 border-top: 1px solid #ddd;
                 border-bottom: 1px solid #ddd;
-                margin: 0px;
-                width: 40px;
-                height: 40px;
+                width: 30px;
+                height: 30px;
             }
 
             input[type=number]::-webkit-inner-spin-button,
             input[type=number]::-webkit-outer-spin-button {
                 -webkit-appearance: none;
                 margin: 0;
+            }
+            .price {
+                display: none;
             }
         </style>

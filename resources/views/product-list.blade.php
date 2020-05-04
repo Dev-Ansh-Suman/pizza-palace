@@ -10,17 +10,20 @@
                 <b><i>{{$product->add_ups}}</i></b>
             </div>
             <div class="col-6" style="left: 2% !important">
-                <strong class="price" style="color: #fd509d;">${{$product->selling_price}}</strong>
+                <strong class="price-list" style="color: #fd509d;">
+                    <span class="price usd-price">${{$product->selling_price}}</span>
+                    <span class="price euro-price">€{{$product->selling_price_euro}}</span>
+                </strong>
             </div>
             <div class="col-6 update-cart-div" style="left: 32% !important">
                 <img class="update-cart add-to-cart" style="cursor:pointer" src="{{url('/cart.png')}}" width="30" data-pst="{{$product->slug}}" data-qty="1">
             </div>
             <div class="col-6 counter-div" style="display: none;">
-                <form class="counter">
-                    <div class="value-button" class="decrease" onclick="decreaseValue()" value="Decrease Value">-</div>
-                    <input type="number" class="number input-wrap" value="0" size="2" />
-                    <div class="value-button" class="increase" onclick="increaseValue()" value="Increase Value">+</div>
-                </form>
+                <div class="counter">
+                    <div class="value-button decrease">-</div>
+                    <input type="number" class="number input-wrap" value="1" size="2" data-pst="{{$product->slug}}" data-qty="1" />
+                    <div class="value-button increase">+</div>
+                </div>
             </div>
         </div>
     </div>

@@ -24,9 +24,6 @@
                         <input type="text" name="address_line_2" class="form-control" placeholder="Address Line 2 (Optional**)">
                     </div>
                     <div class="form-group">
-                        <input type="text" name="landmark" class="form-control" placeholder="Landmark (Optional**)">
-                    </div>
-                    <div class="form-group">
                         <input type="submit" name="post" value="Submit">
                     </div>
                 </form>
@@ -52,7 +49,10 @@
                 </div>
                 <div class="cart-total-div">
                     <strong> Grand Total </strong>
-                    <b class="cart-total"></b><br><br>
+                    <b class="cart-total-b">
+                        <span class="cart-total price usd-price"></span>
+                        <span class="cart-total-euro price euro-price"></span>
+                    </b><br><br>
                     <b>Select Payment Method : </b>
                     <input type="radio" name="pay" value="1" checked="" id="online-pay">
                     <label for="online-pay">Online</label>
@@ -67,3 +67,49 @@
     </div>
 </div>
 <!-- Cart Review Modal End -->
+
+<!-- Order Bill Modal -->
+<div class="modal" id="orderBill">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Your Order Bill</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <!-- Modal body -->
+            <div class="modal-body">
+                <div class="ordered-items">
+                    
+                </div>
+                <div class="cart-total-div">
+                    <strong> Grand Total </strong>
+                    <b class="cart-total-b">
+                        <span class="order-total price usd-price"></span>
+                    </b>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Order Bill Modal End -->
+
+<!-- Order Bill Modal -->
+<div class="modal" id="orderList">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    Your Order List
+                </h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <!-- Modal body -->
+            <div class="modal-body text-center order-list">
+                
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Order Bill Modal End -->

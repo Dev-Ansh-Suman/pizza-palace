@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Model\Product;
 use App\Model\UserAddress;
+use App\Model\Order;
 use App\Helper\UserHelper;
 use Illuminate\Support\Facades\View;
 
@@ -31,7 +32,7 @@ class OrderController extends Controller
         if(Auth::check()){
             $insertArray['user_id'] = Auth::user()->id;
         }
-        UserAddress::updateOrCreate(['session_cart'=>$insertArray['session_cart']],$insertArray);
+        UserAddress::updateOrCreate(['session_cart'=>$insertArray['session_cart'],'order_token'=>null],$insertArray);
         return  response()->json(['status'=>true]);
     }//end storeAddress()
 
@@ -46,4 +47,33 @@ class OrderController extends Controller
         $order = UserHelper::placeOrder($request);
         return  response()->json(['status'=>$order['status']]);
     }//end placeOrder()
+
+    /**
+     * Get Order Bill.
+     *
+     * @param  required \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+    */
+    public function show($orderToken)
+    {
+        $order = UserHelper::getOrder($orderToken);
+        $view = View::make('order',['order'=>$order['order'],'products'=>$order['products']]);
+        $view = $view->render();
+        return  response()->json(['status'=>true,'view'=>$view]);
+    }//end show()
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @param  required \Illuminate\Http\Request $request
+     * @param  optional int $perPage
+     * @return \Illuminate\Http\Response
+    */
+    public function index()
+    {
+        $orders = UserHelper::getOrderList();
+        $view = View::make('order-list',['orders'=>$orders]);
+        $view = $view->render();
+        return  response()->json(['status'=>true,'view'=>$view]);
+    } //end index()
 }

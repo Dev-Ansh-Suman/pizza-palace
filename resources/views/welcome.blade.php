@@ -7,7 +7,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-12">
-                    <h1 class="text-center page-heading">Pizza Palace</h1>
+                    <h1 class="text-center page-heading">The Yummy Pizza</h1>
                 </div>
                 @include('header')
                 @include('search')

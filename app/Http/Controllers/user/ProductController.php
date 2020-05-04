@@ -23,12 +23,9 @@ class ProductController extends Controller
     public function index(Request $request,$perPage=20)
     {
     	$products = UserHelper::getProducts($perPage);
-    	if($request->ajax()){
-    		$listPage = View::make('product-list',['products'=>$products]);
-			$listPage = $listPage->render();
-			return  response()->json(['status'=>true,'view'=>$listPage]);
-    	}
-    	return response()->json($products);
+		$listPage = View::make('product-list',['products'=>$products]);
+		$listPage = $listPage->render();
+		return  response()->json(['status'=>true,'view'=>$listPage]);
     } //end index()
 
     /**
@@ -58,6 +55,7 @@ class ProductController extends Controller
     {
         $itemCount = 0;
         $total = 0;
+        $total_euro = 0;
         $cartId = UserHelper::getCartId($request);
         $getCart = [];
         if(!is_null($cartId)){
@@ -65,14 +63,27 @@ class ProductController extends Controller
         }
         if(!empty($getCart) && !is_null($getCart)) {
             foreach($getCart as $product){
-                $total = $total + $product->selling_price;
-                $itemCount = $itemCount + $product->quantity;
+                $total = $total + ($product->selling_price * $product->quantity);
+                $total_euro = $total_euro + ($product->selling_price_euro * $product->quantity);
+                $itemCount++;
             }
         }
 		$sideCart = View::make('cart-list',['products'=>$getCart]);
     	$sideCart = $sideCart->render();
-		return  response()->json(['status'=>true,'view'=>$sideCart,'item_count'=>$itemCount,'total'=>$total]);
+		return  response()->json(['status'=>true,'view'=>$sideCart,'item_count'=>$itemCount,'total'=>$total,'total_euro'=>$total_euro]);
     }//end refreshCart()
+
+    /**
+     * Set and Get Prefered Currency.
+     *
+     * @param  required \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+    */
+    public function getCurrency(Request $request)
+    {
+        $currency = UserHelper::setGetCurrency($request);
+        return  response()->json(['status'=>true,'currency'=>$currency]);
+    }//end getCurrency()
 
 }
 

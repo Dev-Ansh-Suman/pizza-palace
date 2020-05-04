@@ -24,7 +24,7 @@ class UserHelper
  	*/
     public static function getProducts($perPage=20)
     {
-    	$select = ['slug','title','selling_price','image_url','add_ups'];
+    	$select = ['slug','title','selling_price','selling_price_euro','image_url','add_ups'];
     	$products = Product::select($select)->paginate($perPage);
     	return $products;
     } //end getProducts()
@@ -74,11 +74,21 @@ class UserHelper
     public static function getSessionCart($request)
     {
     	$sessionCart = NULL;
-    	if(Auth::check()){
+        if($request->session()->has('session_cart')){
+            $sessionCart = $request->session()->get('session_cart');
+            if(Auth::check()){
+                Cart::where('user_id',Auth::user()->id)->update(['session_cart'=>$sessionCart]);
+            }
+        }
+    	if(Auth::check() && is_null($sessionCart)){
     		$sessionCart = DB::table('carts')->where('user_id',Auth::user()->id)->value('session_cart');
+            if(empty($sessionCart) || is_null($sessionCart)){
+                $request->session()->put('session_cart', 'CART_'.uniqid());
+                $sessionCart = $request->session()->get('session_cart');
+            }
     		$request->session()->put('session_cart', $sessionCart);
     	}
-    	if($sessionCart == NULL || empty($sessionCart)){
+    	if(is_null($sessionCart) || empty($sessionCart)){
             $request->session()->put('session_cart', 'CART_'.uniqid());
 	    	$sessionCart = $request->session()->get('session_cart');
     	}
@@ -138,17 +148,9 @@ class UserHelper
     public static function getCartId($request)
     {
     	$cartId = NULL;
-  		if($request->session()->has('session_cart')){
-  			$session_cart = $request->session()->get('session_cart');
-  			$cartId = Cart::where('session_cart',$session_cart)->first();
-            if(Auth::check() && $cartId->user_id == NULL){
-                Cart::where('session_cart',$session_cart)->update(['user_id'=> Auth::user()->id]);
-            }
-            if(isset($cartId->id))
-                $cartId = $cartId->id;
-  		}elseif(Auth::check()){
-            $cartId = Cart::where('user_id',Auth::user()->id)->first();
-            $request->session()->put('session_cart',$cartId->session_cart);
+        $session_cart = self::getSessionCart($request);
+        $cartId = Cart::where('session_cart',$session_cart)->first();
+        if(isset($cartId->id)){
             $cartId = $cartId->id;
         }
         return $cartId;
@@ -164,7 +166,7 @@ class UserHelper
     {
         if($cartId){
             $cartData = CartProduct::join('products','cart_products.product_id','=','products.id','left')
-                ->select('cart_products.id','cart_products.quantity','cart_products.product_id','products.selling_price','products.title','products.image_url','products.slug')
+                ->select('cart_products.id','cart_products.quantity','cart_products.product_id','products.selling_price','products.selling_price_euro','products.title','products.image_url','products.slug')
                 ->where('cart_id',$cartId)
                 ->get();
         }else {
@@ -194,31 +196,103 @@ class UserHelper
     public static function placeOrder($request)
     {
         $data = $request->all();
-        $cartId = Cart::where('session_cart',$data['sct'])->value('id');
-        $cart = self::getCart($cartId);
+        $cartId = Cart::where('session_cart',$data['sct'])->first();
+        if(isset($cartId->id)){
+            $cart = self::getCart($cartId->id);
+            $currency = $cartId->prefered_currency;
+        }else{
+            return ['status'=>false];
+        }
         $total = 0;
         $payStatus = $data['pay'];
         $user = NULL;
+        $orderToken = 'ORDER_'.uniqid();
         if(Auth::check()){
             $user = Auth::user()->id;
         }
         if(!empty($cart)){
             DB::beginTransaction();
-            $orderId = Order::create(['session_cart'=>$data['sct'],'user_id'=>$user,'payment_status'=>$payStatus,'payment_method'=>$payStatus])->id;
+            $orderId = Order::create(['session_cart'=>$data['sct'],'user_id'=>$user,'payment_status'=>$payStatus,'payment_method'=>$payStatus,'pay_currency'=>$currency,'order_token'=>$orderToken])->id;
             $orderProduct = [];
             foreach($cart as $key=>$order){
                 $orderProduct[$key]['order_id'] = $orderId;
                 $orderProduct[$key]['product_id'] = $order->product_id;
                 $orderProduct[$key]['quantity'] = $order->quantity;
-                $total = $total + ($order->selling_price);
+                if($currency == 1){
+                    $total = $total + ($order->selling_price);
+                }else{
+                    $total = $total + ($order->selling_price_euro);
+                }
             }
             OrderProduct::insert($orderProduct);
             Order::where('id',$orderId)->update(['total_amount'=>$total]);
             CartProduct::where('cart_id',$cartId)->delete();
+            UserAddress::where(['session_cart'=>$data['sct'],'order_token'=>null])->update(['order_token'=>$orderToken]);
             DB::commit();
             return ['status'=>true];
         }else{
             return ['status'=>false];
         }
     }//end placeOrder()
+
+    /**
+     * Place Order.
+     *
+     * @param  required \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+    */
+    public static function setGetCurrency($request)
+    {
+        $data = $request->all();
+        if($data['curr'] == 0){
+            if($request->session()->has('prefered_currency')){
+                $data['curr'] = $request->session()->get('prefered_currency');
+            }else{
+                $data['curr'] = 1;
+            }
+        }
+        $request->session()->put('prefered_currency', $data['curr']);
+        $cartId = self::getCartId($request);
+        if(!is_null($cartId) || !empty($cartId)){
+            Cart::where('id',$cartId)->update(['prefered_currency'=>$data['curr']]);
+        }
+        return $data['curr'];
+    }//end placeOrder()
+
+    /**
+     * Get Order Bill.
+     *
+     * @param  required \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+    */
+    public static function getOrder($orderToken)
+    {
+        $order = Order::join('user_addresses','orders.order_token','=','user_addresses.order_token','left')
+        ->where('orders.order_token',$orderToken)
+        ->select('orders.id','orders.order_token','orders.total_amount','orders.payment_status','orders.payment_method','orders.pay_currency','user_addresses.username','user_addresses.address_line_1','user_addresses.address_line_2','user_addresses.landmark','user_addresses.mobile')->first();
+        $sp = DB::raw('products.selling_price as sp');
+        if($order->pay_currency == 1){
+            $sp = DB::raw('products.selling_price_euro as sp');
+        }
+        $orderProduct = OrderProduct::join('products','order_products.product_id','=','products.id','left')
+            ->where('order_id',$order->id)
+            ->select('order_products.quantity',$sp,'products.title','products.image_url')->get();
+        return ['order'=>$order,'products'=>$orderProduct];
+    }//end getOrder()
+
+    /**
+     * Get Order List for auth user.
+     *
+     * @param  required \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+    */
+    public static function getOrderList()
+    {
+        $orders = NULL;
+        if(Auth::check()){
+            $orders = Order::where('user_id',Auth::user()->id)
+                ->select('orders.order_token','orders.total_amount','orders.payment_status','orders.payment_method','orders.pay_currency')->get();
+        }
+        return $orders;
+    }//end getOrderList()
 }
