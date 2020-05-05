@@ -74,8 +74,8 @@ class UserHelper
     public static function getSessionCart($request)
     {
     	$sessionCart = NULL;
-        if($request->session()->has('session_cart')){
-            $sessionCart = $request->session()->get('session_cart');
+        if($request->has('cart_token')){
+            $sessionCart = $request->session_cart;
             if(Auth::check()){
                 Cart::where('user_id',Auth::user()->id)->update(['session_cart'=>$sessionCart]);
             }
