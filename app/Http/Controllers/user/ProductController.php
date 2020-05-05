@@ -23,9 +23,10 @@ class ProductController extends Controller
     public function index(Request $request,$perPage=20)
     {
     	$products = UserHelper::getProducts($perPage);
-		$listPage = View::make('product-list',['products'=>$products]);
-		$listPage = $listPage->render();
-		return  response()->json(['status'=>true,'view'=>$listPage]);
+        
+		/*$listPage = View::make('product-list',['products'=>$products]);
+		$listPage = $listPage->render();*/
+		return  response()->json(['status'=>true,'products'=>$products->toArray()]);
     } //end index()
 
     /**
