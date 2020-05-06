@@ -39,8 +39,9 @@ class ProductController extends Controller
     {
     	$addToCart = UserHelper::updateCart($request); //add product to cart
         if ($addToCart['status']) {
-            if($request->quantity == -1)
+            if($request->quantity == -1){
                 return ['status'=>true];
+            }
             $refreshCart = $this->refreshCart($addToCart['session_cart']);
             return $refreshCart;
         } else {
