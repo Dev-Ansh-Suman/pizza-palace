@@ -118,7 +118,7 @@ class UserHelper
     	$sessionCart = self::getSessionCart($request); //gets logged in user id
         //Creates new cart for user if not exist
     	$cart = Cart::updateOrCreate(
-            ['session_cart' => $sessionCart],['user_id' => '','ip_address' => $ipAddress]
+            ['session_cart' => $sessionCart],['user_id' => NULL,'ip_address' => $ipAddress]
         );
         return $cart->id;
     } //end createCart()
