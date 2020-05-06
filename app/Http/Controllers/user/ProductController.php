@@ -78,7 +78,7 @@ class ProductController extends Controller
                 $productList[]  = $innerList;
             }
         }
-		return  response()->json(['status'=>true,'item_count'=>$itemCount,'total'=>$total,'total_euro'=>$total_euro, 'product_list'=>$productList]);
+		return  response()->json(['status'=>true,'item_count'=>$itemCount,'total'=>$total,'total_euro'=>$total_euro, 'product_list'=>$productList, 'session_cart'=>$sessionCart]);
     }//end refreshCart()
 
     /**
