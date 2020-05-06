@@ -85,7 +85,7 @@ class UserHelper
         if(is_null($cartSession) || $cartSession == ''){
             $cartId = self::createCart($request); // returns cart id
         }else{
-            $cartId = self::getCartId($request);
+            $cartId = self::getCartId($cartSession);
         }
         $productId = self::getProductId($data['product']);
         if($data['quantity'] == 0){
@@ -100,7 +100,7 @@ class UserHelper
         }
             
         if ($updateCart) {
-            return ['status'=>true];
+            return ['status'=>true, 'session_cart'=>$cartSession];
         } else {
             return false;
         }
@@ -129,11 +129,10 @@ class UserHelper
      * @param  required \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
  	*/
-    public static function getCartId($request)
+    public static function getCartId($sessionCart)
     {
     	$cartId = NULL;
-        $session_cart = $request->session_cart;
-        $cartId = Cart::where('session_cart',$session_cart)->first();
+        $cartId = Cart::where('session_cart',$sessionCart)->first();
         if(isset($cartId->id)){
             $cartId = $cartId->id;
         }

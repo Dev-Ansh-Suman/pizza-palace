@@ -39,7 +39,7 @@ class ProductController extends Controller
     {
     	$addToCart = UserHelper::updateCart($request); //add product to cart
         if ($addToCart['status']) {
-            $refreshCart = $this->refreshCart($request);
+            $refreshCart = $this->refreshCart($addToCart['session_cart']);
             return $refreshCart;
         } else {
             return['status'=>false];
@@ -52,26 +52,33 @@ class ProductController extends Controller
      * @param  required \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
     */
-    public function refreshCart(Request $request)
+    public function refreshCart($sessionCart)
     {
         $itemCount = 0;
         $total = 0;
         $total_euro = 0;
-        $cartId = UserHelper::getCartId($request);
+        $cartId = UserHelper::getCartId($sessionCart);
         $getCart = [];
         if(!is_null($cartId)){
             $getCart = UserHelper::getCart($cartId);
+        }else{
+            return  response()->json(['status'=>true,'item_count'=>0,'total'=>0,'total_euro'=>0]);
         }
         if(!empty($getCart) && !is_null($getCart)) {
+            $productList = [];
             foreach($getCart as $product){
+                $innerList = [];
+                $innerList['title'] = $product->title;
+                $innerList['qunatity'] = $product->quantity;
+                $innerList['product_id'] = $product->product_id;
+                $innerList['selling_price'] = $product->selling_price;
                 $total = $total + ($product->selling_price * $product->quantity);
                 $total_euro = $total_euro + ($product->selling_price_euro * $product->quantity);
                 $itemCount++;
+                $productList[]  = $innerList;
             }
         }
-		$sideCart = View::make('cart-list',['products'=>$getCart]);
-    	$sideCart = $sideCart->render();
-		return  response()->json(['status'=>true,'view'=>$sideCart,'item_count'=>$itemCount,'total'=>$total,'total_euro'=>$total_euro]);
+		return  response()->json(['status'=>true,'item_count'=>$itemCount,'total'=>$total,'total_euro'=>$total_euro, 'product_list'=>$productList]);
     }//end refreshCart()
 
     /**
