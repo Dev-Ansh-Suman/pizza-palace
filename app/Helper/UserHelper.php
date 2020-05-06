@@ -89,11 +89,13 @@ class UserHelper
         }else{
             $cartId = self::getCartId($cartSession);
         }
-        $productId = self::getProductId($data['product']);
+        if($data['quantity'] != -1)
+            $productId = self::getProductId($data['product']);
         if($data['quantity'] == 0){
             $updateCart = CartProduct::where(['cart_id'=>$cartId,'product_id'=>$productId])->delete();
         }elseif($data['quantity'] == -1){
             $updateCart = CartProduct::where('cart_id',$cartId)->delete();
+            $updateCart = Cart::where('cart_id',$cartId)->delete();
         }else{
             $updateCart = CartProduct::updateOrCreate(
                 ['cart_id' => $cartId, 'product_id' => $productId],
@@ -102,7 +104,10 @@ class UserHelper
         }
             
         if ($updateCart) {
-            return ['status'=>true, 'session_cart'=>$cartSession];
+            if($data['quantity'] != -1)
+                return ['status'=>true];
+            else
+                return ['status'=>true, 'session_cart'=>$cartSession];
         } else {
             return false;
         }
