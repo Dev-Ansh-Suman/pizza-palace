@@ -83,7 +83,9 @@ class UserHelper
         $data = $request->all();
     	$cartSession = $request->session_cart; // returns cart id
         if(is_null($cartSession) || $cartSession == ''){
-            $cartId = self::createCart($request); // returns cart id
+            $createCart = self::createCart($request); // returns cart id
+            $cartId = $createCart['cart_id'];
+            $cartSession = $createCart['session_cart'];
         }else{
             $cartId = self::getCartId($cartSession);
         }
@@ -120,7 +122,7 @@ class UserHelper
     	$cart = Cart::updateOrCreate(
             ['session_cart' => $sessionCart],['user_id' => NULL,'ip_address' => $ipAddress]
         );
-        return $cart->id;
+        return ['cart_id'=>$cart->id, 'session_cart'=>$sessionCart];
     } //end createCart()
 
     /**
