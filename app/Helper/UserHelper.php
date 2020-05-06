@@ -87,6 +87,7 @@ class UserHelper
         }else{
             $cartId = self::getCartId($request);
         }
+        print_r($data);die;
         $productId = self::getProductId($data['product']);
         if($data['quantity'] == 0){
             $updateCart = CartProduct::where(['cart_id'=>$cartId,'product_id'=>$productId])->delete();
