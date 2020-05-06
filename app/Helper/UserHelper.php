@@ -104,7 +104,7 @@ class UserHelper
         }
             
         if ($updateCart) {
-            if($data['quantity'] != -1)
+            if($data['quantity'] == -1)
                 return ['status'=>true];
             else
                 return ['status'=>true, 'session_cart'=>$cartSession];
