@@ -39,6 +39,7 @@ class ProductController extends Controller
     {
     	$addToCart = UserHelper::updateCart($request); //add product to cart
         if ($addToCart['status']) {
+            echo 'wunatity '.$request->qunatity;die;
             if($request->quantity == -1){
                 return ['status'=>true];
             }
