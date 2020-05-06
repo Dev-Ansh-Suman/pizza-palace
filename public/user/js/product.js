@@ -3,7 +3,7 @@ refreshCart();
 getOrderList();
 function getProductList(){
 	jQuery.ajax({
-		url : jQuery('body').data('url')+'/api/product-list',
+		url : 'https://pizza.softsnare.com/api/product-list',
         method : 'get',
         dataType : 'json',
         success : function(response){

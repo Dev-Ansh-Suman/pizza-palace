@@ -73,25 +73,7 @@ class UserHelper
  	*/
     public static function getSessionCart($request)
     {
-    	$sessionCart = NULL;
-        if($request->has('cart_token')){
-            $sessionCart = $request->session_cart;
-            if(Auth::check()){
-                Cart::where('user_id',Auth::user()->id)->update(['session_cart'=>$sessionCart]);
-            }
-        }
-    	if(Auth::check() && is_null($sessionCart)){
-    		$sessionCart = DB::table('carts')->where('user_id',Auth::user()->id)->value('session_cart');
-            if(empty($sessionCart) || is_null($sessionCart)){
-                $request->session()->put('session_cart', 'CART_'.uniqid());
-                $sessionCart = $request->session()->get('session_cart');
-            }
-    		$request->session()->put('session_cart', $sessionCart);
-    	}
-    	if(is_null($sessionCart) || empty($sessionCart)){
-            $request->session()->put('session_cart', 'CART_'.uniqid());
-	    	$sessionCart = $request->session()->get('session_cart');
-    	}
+    	$sessionCart = 'CART_'.uniqid();
         return $sessionCart;
     } //end getSessionCart()
 
@@ -99,9 +81,11 @@ class UserHelper
     {
         $updateCart = true;
         $data = $request->all();
-    	$cartId = self::getCartId($request); // returns cart id
-        if(is_null($cartId)){
+    	$cartSession = $request->session_cart; // returns cart id
+        if(is_null($cartSession) || $cartSession == ''){
             $cartId = self::createCart($request); // returns cart id
+        }else{
+            $cartId = self::getCartId($request);
         }
         $productId = self::getProductId($data['product']);
         if($data['quantity'] == 0){
@@ -130,11 +114,11 @@ class UserHelper
     public static function createCart($request)
     {
 		$ipAddress = self::getClientIp(); //gets client ip address
-    	$userId = self::getLoggedUserId(); //gets logged in user id
+    	//$userId = self::getLoggedUserId(); //gets logged in user id
     	$sessionCart = self::getSessionCart($request); //gets logged in user id
         //Creates new cart for user if not exist
     	$cart = Cart::updateOrCreate(
-            ['session_cart' => $sessionCart],['user_id' => $userId,'ip_address' => $ipAddress]
+            ['session_cart' => $sessionCart],['user_id' => '','ip_address' => $ipAddress]
         );
         return $cart->id;
     } //end createCart()
@@ -148,7 +132,7 @@ class UserHelper
     public static function getCartId($request)
     {
     	$cartId = NULL;
-        $session_cart = self::getSessionCart($request);
+        $session_cart = $request->session_cart;
         $cartId = Cart::where('session_cart',$session_cart)->first();
         if(isset($cartId->id)){
             $cartId = $cartId->id;
