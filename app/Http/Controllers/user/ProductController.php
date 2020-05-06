@@ -38,6 +38,7 @@ class ProductController extends Controller
     public function updateCart(Request $request)
     {
     	$addToCart = UserHelper::updateCart($request); //add product to cart
+        print_r($addToCart);die;
         if ($addToCart['status']) {
             $refreshCart = $this->refreshCart($addToCart['session_cart']);
             return $refreshCart;
