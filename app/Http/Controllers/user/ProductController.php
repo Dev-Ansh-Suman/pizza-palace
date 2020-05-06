@@ -71,7 +71,7 @@ class ProductController extends Controller
                 $innerList = [];
                 $innerList['title'] = $product->title;
                 $innerList['qunatity'] = $product->quantity;
-                $innerList['product_id'] = $product->product_id;
+                $innerList['slug'] = $product->slug;
                 $innerList['selling_price'] = $product->selling_price;
                 $total = $total + ($product->selling_price * $product->quantity);
                 $total_euro = $total_euro + ($product->selling_price_euro * $product->quantity);
